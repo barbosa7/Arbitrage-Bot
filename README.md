@@ -1,6 +1,11 @@
 ## Submission file
  is /src/bot.py
 
+## Team
+* [Tomás Barbosa](https://github.com/barbosa7)
+* [Nader Bennour](https://github.com/naderbennour)
+* [Vicente Almeida](https://github.com/almeidavc)
+
 ## Inspiration
 We had a lot of fun when we were ranked number 1 in the challenge and testing phase. Our goal is to repeat our success in the official testing period and defend our title.
 
