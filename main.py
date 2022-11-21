@@ -11,8 +11,8 @@ logger = logging.getLogger(__name__)
 class Bot:
     def __init__(self, _e: Exchange):
         self.e = _e
-        self.BASKET_ID = 'C2_GREEN_ENERGY_ETF'
-        self.STOCK_IDS = ['C2_SOLAR_CO', 'C2_WIND_LTD']
+        self.BASKET_ID = 'ETF1'
+        self.STOCK_IDS = ['STOCK_A', 'STOCK_B']
         self.trade_history = {
             self.BASKET_ID: None,
             self.STOCK_IDS[0]: None,
@@ -45,14 +45,14 @@ class Bot:
             self.e.place_order(instrument_id=instrument_id, price=price, volume=volume, side=side, order_type=order_type)
 
     def set_green(self):
-        basket = 'C2_GREEN_ENERGY_ETF'
-        stocks = ['C2_SOLAR_CO', 'C2_WIND_LTD']
+        basket = 'ETF1'
+        stocks = ['STOCK_A', 'STOCK_B']
         return (basket, stocks)
 
 
     def set_fossil(self):
-        basket = 'C1_FOSSIL_FUEL_ETF'
-        stocks = ['C1_GAS_INC', 'C1_OIL_CORP']
+        basket = 'ETF2'
+        stocks = ['STOCK_C', 'STOCK_D']
         return (basket, stocks)
 
     def get_trade_history(self, instrument_id: str):
@@ -289,7 +289,7 @@ class Bot:
 
 
     def market_make_ask_basket(self):
-        if (self.BASKET_ID=='C2_GREEN_ENERGY_ETF'):
+        if (self.BASKET_ID=='ETF1'):
             self.bestask_green = min([self.books[self.BASKET_ID].asks[0].price-self.increment,self.bestask_green])
             self.bestbid_green = max([self.get_last_trade_price(self.BASKET_ID) - 10,self.bestbid_green])
             no_self_trade = self.bestask_green-self.bestbid_green >=   0.1
@@ -312,7 +312,7 @@ class Bot:
             #self.increment-=0.1
 
     def market_make_bid_basket(self):
-        if (self.BASKET_ID=='C2_GREEN_ENERGY_ETF'):
+        if (self.BASKET_ID=='ETF1'):
             self.bestask_green = min([self.get_last_trade_price(self.BASKET_ID) + 10,self.bestask_green])
             self.bestbid_green = max([self.books[self.BASKET_ID].bids[0].price+self.increment,self.bestbid_green])
             no_self_trade = self.bestask_green-self.bestbid_green >=0.1
@@ -359,7 +359,7 @@ class Bot:
     def market_make_basket(self):
         short_price = self.books[self.BASKET_ID].asks[0].price-self.increment
         long_price = self.books[self.BASKET_ID].bids[0].price+self.increment
-        if (self.BASKET_ID=='C2_GREEN_ENERGY_ETF'):
+        if (self.BASKET_ID=='ETF1'):
             self.bestask_green = min([short_price,self.bestask_green])
             self.bestbid_green = max([long_price,self.bestbid_green])
             no_self_trade = self.bestask_green-self.bestbid_green >= 0.1
@@ -437,14 +437,14 @@ class Bot:
 
     def evaluate_position_risk(self):
         total_size = sum(self.positions.values())
-        unhedged_size =  abs(self.positions['C2_GREEN_ENERGY_ETF'] + \
-                (self.positions['C2_SOLAR_CO'] + self.positions['C2_WIND_LTD'])) + \
-                    abs(self.positions['C1_FOSSIL_FUEL_ETF'] + \
-                (self.positions['C1_GAS_INC'] + self.positions['C1_OIL_CORP']))
+        unhedged_size =  abs(self.positions['ETF1'] + \
+                (self.positions['STOCK_A'] + self.positions['STOCK_B'])) + \
+                    abs(self.positions['ETF2'] + \
+                (self.positions['STOCK_C'] + self.positions['STOCK_D']))
         return round(total_size/750 + unhedged_size/45)
 
     def change_market(self):
-        if (self.BASKET_ID == 'C2_GREEN_ENERGY_ETF'):
+        if (self.BASKET_ID == 'ETF2'):
             (self.BASKET_ID, self.STOCK_IDS) = self.set_fossil()
         else:
             (self.BASKET_ID, self.STOCK_IDS) = self.set_green()
