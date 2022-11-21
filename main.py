@@ -1,10 +1,6 @@
 import logging
 import time
 from typing import List, Dict
-from optibook import common_types as t
-from optibook import ORDER_TYPE_IOC, ORDER_TYPE_LIMIT, SIDE_ASK, SIDE_BID
-from optibook.exchange_responses import InsertOrderResponse
-from optibook.synchronous_client import Exchange
 import random
 import json
 
@@ -39,14 +35,14 @@ class Bot:
     
     def is_over_order_limit(self, instrument_id, volume_of_next_order):
         current_orders_volume = 0
-        for order in self.e.get_outstanding_orders(instrument_id).values():
+        for order in self.e.get_all_orders(instrument_id).values():
             if (order.instrument_id == instrument_id):
                 current_orders_volume += order.volume
         return volume_of_next_order + current_orders_volume >= 800 
 
     def safe_insert_order(self, instrument_id: str, *, price: float, volume: int, side: str, order_type: str = 'limit'):
         if (not self.is_over_order_limit(instrument_id, volume)):
-            self.e.insert_order(instrument_id=instrument_id, price=price, volume=volume, side=side, order_type=order_type)
+            self.e.place_order(instrument_id=instrument_id, price=price, volume=volume, side=side, order_type=order_type)
 
     def set_green(self):
         basket = 'C2_GREEN_ENERGY_ETF'
@@ -61,7 +57,7 @@ class Bot:
 
     def get_trade_history(self, instrument_id: str):
         if (not self.trade_history[instrument_id]):
-            self.trade_history[instrument_id] = self.e.get_trade_tick_history(instrument_id)
+            self.trade_history[instrument_id] = self.e.get_previous_trade_history(instrument_id)
         return self.trade_history[instrument_id]
 
 
@@ -73,14 +69,6 @@ class Bot:
             return th[-1].price
 
 
-    def print_report(self):
-        pnl = self.e.get_pnl()
-        positions = self.e.get_positions()
-        my_trades = self.e.poll_new_trades(self.BASKET_ID)
-        all_market_trades = self.e.poll_new_trade_ticks(self.BASKET_ID)
-        logger.info(f'I have done {len(my_trades)} trade(s) in {self.BASKET_ID} since the last report. There have been {len(all_market_trades)} market trade(s) in total in {self.BASKET_ID} since the last report.')
-        logger.info(f'My PNL is: {pnl:.2f}')
-        logger.info(f'My current positions are: {json.dumps(positions, indent=3)}')
 
     # edge case where asks is 0 and we need to correct the hedge isn't handled yet
 
@@ -215,7 +203,6 @@ class Bot:
 
 
     def try_close_all_positions(self):
-        self.print_report()
         for instr_id in self.positions.keys():
             book = self.books[instr_id]
             position_volume = self.positions[instr_id]
@@ -240,14 +227,14 @@ class Bot:
     def print_trade_history(self, instr_ids: List[str]):
         for instr_id in instr_ids:
             print(instr_id)
-            print(self.e.get_trade_history(instr_id))
+            print(self.e.get_previous_trade_history(instr_id))
             print('')
 
 
     def delete_all_orders(self):
-        self.e.delete_orders(self.BASKET_ID)
-        self.e.delete_orders(self.STOCK_IDS[0])
-        self.e.delete_orders(self.STOCK_IDS[1])
+        self.e.delete_all_orders(self.BASKET_ID)
+        self.e.delete_all_orders(self.STOCK_IDS[0])
+        self.e.delete_all_orders(self.STOCK_IDS[1])
         self.cycle_count = 0
         self.bestask_green = 10000000
         self.bestbid_green = -10000000
@@ -424,7 +411,7 @@ class Bot:
                     self.STOCK_IDS[asset], price=long_price, volume=12, side=SIDE_BID, order_type=ORDER_TYPE_LIMIT)
             if self.positions[self.STOCK_IDS[asset]]-12 > -500:
                 print("short_price: "+ str(short_price))
-                print(self.e.get_outstanding_orders(self.STOCK_IDS[asset]))
+                print(self.e.get_all_orders(self.STOCK_IDS[asset]))
                 self.safe_insert_order(
                     self.STOCK_IDS[asset], price=short_price, volume=12, side=SIDE_ASK, order_type=ORDER_TYPE_LIMIT)
 
@@ -436,11 +423,11 @@ class Bot:
             self.short()
 
     def update_data(self):
-        self.positions = self.e.get_positions()
+        self.positions = self.e.get_current_positions()
         self.books = {
-            self.BASKET_ID: self.e.get_last_price_book(self.BASKET_ID),
-            self.STOCK_IDS[0]: self.e.get_last_price_book(self.STOCK_IDS[0]),
-            self.STOCK_IDS[1]: self.e.get_last_price_book(self.STOCK_IDS[1]),
+            self.BASKET_ID: self.e.get_most_recent_price_book(self.BASKET_ID),
+            self.STOCK_IDS[0]: self.e.get_most_recent_book(self.STOCK_IDS[0]),
+            self.STOCK_IDS[1]: self.e.get_most_recent_price_book(self.STOCK_IDS[1]),
         }
         self.trade_history = {
             self.BASKET_ID: None,
@@ -475,7 +462,6 @@ class Bot:
         else:
             self.market_make()
 
-        self.print_report()
         self.cycle_count += 1
 
     def run(self):
