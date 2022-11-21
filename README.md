@@ -40,4 +40,17 @@ There are a few ways in which the bot is currently leaving money on the table, s
  
 * **improving the risk function:**  like I said, the function is relatively unsophisticated and obviously making it more accurate would be of good use.
 
+* **dynamic parameters:** the parameters I choose for the script were the best I found, that being said a lot of them were only the best in the moment I found them since the market keeps changing. The best way to account for this change would be for this parameters to be calculated on a dynamic way by reading the market. There also parameters that should be based on the current risk like order size, I tried to implement this at the end but couldn't figure out a way to make it profitable in time and ended up deleting it. 
+
+### parameters
+
+there are a few numbers in the function that could be changed, this is why they were chosen like this:
+
+* **max position size: 500** - (decided by the event organizers)
+* **max position unhedged size: 50** - (decided by the event organizers)
+* **max order volume open: 800** - (decided by the event organizers)
+* **market making (liquid) order size: 12** (24 for ETFS) - small enough that we can make a lot of them without reaching the limits, but big enough that it is relevant
+* **market making (illiquid) order size: 50** - we don't have a lot of this opportunities so this should be as possible. Since this is unhedged iy would be a bit risky making it more than 50 though.
+* **amount of times to run the market making strategy before arbitrage: 3** - :point_down:
+* **sleep time between cycles : 5 seconds** - we tried a lot of different things and the combination between 3 calls and 5 seconds sleep was the best we found, this allows the orders enough time to be filled, making the 3 bigger would mean that it would happen more often that we have already reached the position size or roder limits and would just be wasting time while making the time smaller would increase the chance that our orders don't get filled.
 
