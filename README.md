@@ -2,6 +2,8 @@
 
 This Bot was made with the purpose of competing in a Hackathon against the bots of other teams in a closed environment (there were also some bots from the event organizers).
 
+this bot was also connected to the events api and using it's calls, i've been asked to remove the api import and change the name of the api functions just so thatin case they repeat this challenge the code won't be found online. That's why you'll see some functions that are called from the exchange that don't seem to exist, they are replacing the original api calls but I think their names represent accurately what the functions do.
+
 The stocks and ETFs were ficticious, meaning there were no fundamentals to trade on, but there were a limited number of participants in the market (about 50 teams) so the market was a bit inefficient. The best 2 ways to make money were to do Arbitrage and to be a Market Maker, so I used a hybrid strategy between both.
 
 It's also important to mention that, since there were no fundamentals, there was no reason to trade directionally and it would increase the risk, I tried to stay market neutral to try not to be dependent on market fluctuations in either direction.
