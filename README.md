@@ -52,7 +52,7 @@ there are a few numbers in the function that could be changed, this is why they 
 * **max position unhedged size: 50** - (decided by the event organizers)
 * **max order volume open: 800** - (decided by the event organizers)
 * **market making (liquid) order size: 12** (24 for ETFS) - small enough that we can make a lot of them without reaching the limits, but big enough that it is relevant
-* **market making (illiquid) order size: 50** - we don't have a lot of this opportunities so this should be as possible. Since this is unhedged iy would be a bit risky making it more than 50 though.
+* **market making (illiquid) order size: 50** - we don't have a lot of this opportunities so this should be as greedy possible. Since this is unhedged iy would be a bit risky making it more than 50 though.
 * **amount of times to run the market making strategy before arbitrage: 3** - :point_down:
 * **sleep time between cycles : 5 seconds** - we tried a lot of different things and the combination between 3 calls and 5 seconds sleep was the best we found, this allows the orders enough time to be filled, making the 3 bigger would mean that it would happen more often that we have already reached the position size or roder limits and would just be wasting time while making the time smaller would increase the chance that our orders don't get filled.
 
